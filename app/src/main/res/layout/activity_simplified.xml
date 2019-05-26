@@ -6,14 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
+    android:animateLayoutChanges="true"
     tools:context="org.ea.sqrl.activites.SimplifiedActivity">
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/useIdentityLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/layout_corners"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/quickPassLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -84,6 +85,83 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btnUseIdentity" />
     </android.support.constraint.ConstraintLayout>
+
+
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@+id/quickPassLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        app:flexWrap="wrap"
+        app:alignItems="baseline"
+        app:alignContent="flex_start"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:paddingLeft="0dp"
+            android:paddingStart="0dp"
+            android:paddingRight="8dp"
+            android:paddingEnd="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/txtQuickPassActiveHeadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/notification_identity_unlocked"
+                android:textAllCaps="false"
+                android:textColor="@android:color/primary_text_dark"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/txtQuickPassTimeout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:text="00:12:57"
+                android:textAllCaps="false"
+                android:textColor="@android:color/primary_text_dark"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/btnClearQuickPass"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:minWidth="32dp"
+                android:textSize="10sp"
+                android:text="@string/button_quickpass_clear" />
+
+            <Button
+                android:id="@+id/btnExtendQuickPassTimeout"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:minWidth="32dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginLeft="0dp"
+                android:textSize="10sp"
+                android:text="@string/button_quickpass_extend" />
+
+        </LinearLayout>
+
+
+    </com.google.android.flexbox.FlexboxLayout>
 
 
 </android.support.constraint.ConstraintLayout>

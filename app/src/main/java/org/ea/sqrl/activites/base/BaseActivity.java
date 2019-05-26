@@ -13,6 +13,7 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -20,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
@@ -383,6 +385,13 @@ public class BaseActivity extends CommonBaseActivity {
 
     public void clearQuickPassDelayed() {
         long delayMillis = SQRLStorage.getInstance(BaseActivity.this.getApplicationContext()).getIdleTimeout() * 60000;
+        long expiryTimeInMillis = System.currentTimeMillis() + delayMillis;
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        long currentId = sharedPreferences.getLong(CURRENT_ID, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong("QUICKPASS_EXPIRATION_TIME_MILLIS" + currentId, expiryTimeInMillis);
+        editor.apply();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             JobInfo jobInfo = new JobInfo.Builder(ClearIdentityService.JOB_NUMBER, new ComponentName(this, ClearIdentityService.class))
@@ -397,14 +406,13 @@ public class BaseActivity extends CommonBaseActivity {
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
 
             int SDK_INT = Build.VERSION.SDK_INT;
-            long timeInMillis = System.currentTimeMillis() + delayMillis;
 
             if(alarmManager == null) return;
 
             if (SDK_INT < Build.VERSION_CODES.KITKAT) {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, expiryTimeInMillis, pendingIntent);
             } else if (SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, timeInMillis, pendingIntent);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, expiryTimeInMillis, pendingIntent);
             }
         }
     }

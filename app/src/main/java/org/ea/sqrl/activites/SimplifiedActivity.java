@@ -7,6 +7,8 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.CountDownTimer;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -38,8 +41,11 @@ import javax.crypto.Cipher;
 public class SimplifiedActivity extends LoginBaseActivity {
     private static final String TAG = "SimplifiedActivity";
 
+    private CountDownTimer quickPassCountdownTimer = null;
     private TextView txtSelectedIdentityHeadline = null;
     private TextView txtSelectedIdentity = null;
+    private FlexboxLayout quickPassLayout = null;
+    private TextView txtQuickPassTimeout = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +64,29 @@ public class SimplifiedActivity extends LoginBaseActivity {
                     startActivity(new Intent(this, MainActivity.class));
                 }
         );
+
+        quickPassLayout = findViewById(R.id.quickPassLayout);
+        txtQuickPassTimeout = findViewById(R.id.txtQuickPassTimeout);
+
+        findViewById(R.id.btnClearQuickPass).setOnClickListener(
+                v -> {
+                    SQRLStorage storage = SQRLStorage.getInstance(SimplifiedActivity.this.getApplicationContext());
+                    storage.clearQuickPass();
+
+                    if (quickPassCountdownTimer != null) {
+                        quickPassCountdownTimer.cancel();
+                        checkQuickPassStatus();
+                    }
+                }
+        );
+        findViewById(R.id.btnExtendQuickPassTimeout).setOnClickListener(
+                v -> {
+                    clearQuickPassDelayed();
+                }
+        );
+
+        TextView txtQuickPassActiveHeadline = findViewById(R.id.txtQuickPassActiveHeadline);
+        txtQuickPassActiveHeadline.append(":");
 
         final IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
@@ -122,7 +151,26 @@ public class SimplifiedActivity extends LoginBaseActivity {
             }
 
             setupBasePopups(getLayoutInflater(), false);
+
+            quickPassCountdownTimer = new CountDownTimer(Long.MAX_VALUE, 1000) {
+
+                public void onTick(long millisUntilFinished) {
+                    checkQuickPassStatus();
+                }
+
+                public void onFinish() {
+                    checkQuickPassStatus();
+                }
+            }.start();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        quickPassCountdownTimer.cancel();
+        checkQuickPassStatus();
     }
 
     @Override
@@ -229,4 +277,33 @@ public class SimplifiedActivity extends LoginBaseActivity {
         }
     }
 
+    private void checkQuickPassStatus() {
+        SQRLStorage storage = SQRLStorage.getInstance(SimplifiedActivity.this.getApplicationContext());
+
+        if (storage.hasQuickPass()) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+            long currentId = sharedPreferences.getLong(CURRENT_ID, 0);
+            long quickPassExpirationTime = sharedPreferences.getLong("QUICKPASS_EXPIRATION_TIME_MILLIS" + currentId, -1);
+            long duration = quickPassExpirationTime - System.currentTimeMillis();
+
+            int hours = 0, minutes = 0, seconds = 0;
+
+            if (duration > 0) {
+                hours = (int)(duration / 3.6e+6);
+                minutes = (int)((duration % 3.6e+6) / 60000 );
+                seconds = (int) (((duration % 3.6e+6) % 60000 ) / 1000);
+            }
+
+            String countdown = String.format("%02d", hours) + ":" +
+                    String.format("%02d", minutes) + ":" +
+                    String.format("%02d", seconds);
+
+            txtQuickPassTimeout.setText(countdown);
+            quickPassLayout.setVisibility(View.VISIBLE);
+        } else {
+            if (quickPassCountdownTimer != null) quickPassCountdownTimer.cancel();
+            quickPassLayout.setVisibility(View.GONE);
+        }
+    }
 }
