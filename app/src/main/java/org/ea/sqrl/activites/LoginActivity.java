@@ -8,6 +8,8 @@ import android.os.CancellationSignal;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -206,7 +208,8 @@ public class LoginActivity extends LoginBaseActivity {
 
     private void setupAdvancedFunctions() {
         final ConstraintLayout advancedFunctionsLayout = findViewById(R.id.advancedFunctionsLayout);
-        final ImageView imgAdvancedFunctionsToggle = findViewById(R.id.imgAdvancedFunctionsToggle);
+        final ImageView imgAdvancedFunctionsToggleUp = findViewById(R.id.imgAdvancedFunctionsToggleUp);
+        final ImageView imgAdvancedFunctionsToggleDown = findViewById(R.id.imgAdvancedFunctionsToggleDown);
         final TextView txtAdvancedFunctions = findViewById(R.id.txtAdvancedFunctions);
         final RadioGroup radgrpAccountOptions = findViewById(R.id.radgrpAccountOptions);
         final Button btnLogin = findViewById(R.id.btnLogin);
@@ -248,7 +251,8 @@ public class LoginActivity extends LoginBaseActivity {
             }
         });
 
-        imgAdvancedFunctionsToggle.setOnClickListener(toggleAdvancedFunctionsListener);
+        imgAdvancedFunctionsToggleUp.setOnClickListener(toggleAdvancedFunctionsListener);
+        imgAdvancedFunctionsToggleDown.setOnClickListener(toggleAdvancedFunctionsListener);
         txtAdvancedFunctions.setOnClickListener(toggleAdvancedFunctionsListener);
 
         advancedFunctionsLayout.setVisibility(View.GONE);
@@ -273,19 +277,20 @@ public class LoginActivity extends LoginBaseActivity {
 
     private View.OnClickListener toggleAdvancedFunctionsListener = (v) -> {
         final ConstraintLayout advancedFunctionsLayout = findViewById(R.id.advancedFunctionsLayout);
-        final ImageView imgAdvancedFunctionsToggle = findViewById(R.id.imgAdvancedFunctionsToggle);
+        final ImageView imgAdvancedFunctionsToggleDown = findViewById(R.id.imgAdvancedFunctionsToggleDown);
+        final ImageView imgAdvancedFunctionsToggleUp = findViewById(R.id.imgAdvancedFunctionsToggleUp);
         final TextView txtLoginDescription = findViewById(R.id.txtLoginDescription);
 
         txtLoginDescription.setVisibility(View.GONE);
 
         if (advancedFunctionsLayout.getVisibility() == View.GONE) {
             advancedFunctionsLayout.setVisibility(View.VISIBLE);
-            imgAdvancedFunctionsToggle.setImageDrawable(getResources().getDrawable(
-                    R.drawable.ic_keyboard_arrow_up_gray_24dp));
+            imgAdvancedFunctionsToggleUp.setVisibility(View.VISIBLE);
+            imgAdvancedFunctionsToggleDown.setVisibility(View.GONE);
         } else {
             advancedFunctionsLayout.setVisibility(View.GONE);
-            imgAdvancedFunctionsToggle.setImageDrawable(getResources().getDrawable(
-                    R.drawable.ic_keyboard_arrow_down_gray_24dp));
+            imgAdvancedFunctionsToggleUp.setVisibility(View.GONE);
+            imgAdvancedFunctionsToggleDown.setVisibility(View.VISIBLE);
         }
     };
 
