@@ -28,7 +28,8 @@ public class SqrlApplication extends Application {
     private static final String TAG = "SqrlApplication";
     public static final String APPS_PREFERENCES = "org.ea.sqrl.preferences";
     public static final String CURRENT_ID = "current_id";
-    public static String EXTRA_NEXT_ACTIVITY = "next_activity";
+    public static final String EXTRA_NEXT_ACTIVITY = "next_activity";
+    public static final String SHARED_PREF_ALT_IDS = "alt_ids";
 
     static ShortcutInfo scanShortcut;
     static ShortcutInfo logonShortcut;
