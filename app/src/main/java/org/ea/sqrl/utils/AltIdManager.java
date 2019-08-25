@@ -127,6 +127,7 @@ public class AltIdManager {
      * @param altId         The alternate id string to be checked for.
      * @param identityId    The id of the corresponding identity. Specify -1 if the
      *                      identity id should be ignored in the search.
+     * @return              True if an alt id was found, false otherwise.
      */
     public boolean hasAltId(String altId, long identityId) {
         Set<String> altIds = getAltIdsRaw();
@@ -142,6 +143,29 @@ public class AltIdManager {
                 if (identityId == -1 || storedIdentityId == identityId) {
                     return true;
                 }
+            }
+        }
+
+        return false;
+    }
+
+    /***
+     * Checks whether or not there are alternate ids present for the given identity.
+     *
+     * @param identityId    The id of the identity for which alt ids should be checked.
+     *                      Specify -1 if the identity id should be ignored in the search.
+     * @return              True if an alt id was found, false otherwise.
+     */
+    public boolean hasAltIds(long identityId) {
+        Set<String> altIds = getAltIdsRaw();
+
+        for (String entry : altIds) {
+            String[] tokens = entry.split(";", 1);
+            if (tokens.length < 2) continue;
+
+            long storedIdentityId = Long.valueOf(tokens[0]);
+            if (identityId == -1 || storedIdentityId == identityId) {
+                return true;
             }
         }
 
