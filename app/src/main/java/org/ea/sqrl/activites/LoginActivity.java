@@ -1,5 +1,6 @@
 package org.ea.sqrl.activites;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.biometrics.BiometricPrompt;
@@ -52,6 +53,7 @@ public class LoginActivity extends LoginBaseActivity {
     private IdentitySelector mIdentitySelector = null;
     private Matcher mSqrlMatcher;
     private RescueCodeInputHelper mRescueCodeInputHelper;
+    private boolean mAltIdHandled = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -275,6 +277,9 @@ public class LoginActivity extends LoginBaseActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean saveAltIds = sharedPreferences.getBoolean(SqrlApplication.SHARED_PREF_STORE_ALT_IDS, false);
 
+        imgAlternateIdList.setOnClickListener(view -> {
+
+        });
         if (saveAltIds && altIdManager.hasAltIds(SqrlApplication.getCurrentId(this))) {
             imgAlternateIdList.setVisibility(View.VISIBLE);
         } else {
@@ -376,7 +381,10 @@ public class LoginActivity extends LoginBaseActivity {
 
         String alternateId = ((TextView)findViewById(R.id.txtAlternateId)).getText().toString();
         if (!alternateId.equals("")) {
+            mAltIdHandled = false;
             handleAltId(alternateId);
+        } else {
+            mAltIdHandled = true;
         }
 
         communicationFlowHandler.setUrlBasedLogin(useCps);
@@ -427,6 +435,11 @@ public class LoginActivity extends LoginBaseActivity {
                 handler.post(() -> hideProgressPopup());
             });
 
+            while (!mAltIdHandled) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {}
+            }
             communicationFlowHandler.handleNextAction();
         }).start();
     }
@@ -436,10 +449,46 @@ public class LoginActivity extends LoginBaseActivity {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean storeAltIds = sharedPreferences.getBoolean(SqrlApplication.SHARED_PREF_STORE_ALT_IDS, false);
-        if (!storeAltIds) return;
+        if (!storeAltIds) {
+            mAltIdHandled = true;
+            return;
+        }
 
+        boolean askBeforeSavingAltId = sharedPreferences.getBoolean(SqrlApplication.SHARED_PREF_ASK_BEFORE_STORING_ALT_IDS, true);
         AltIdManager altIdManager = AltIdManager.getInstance(this);
-        altIdManager.saveAltId(alternateId, SqrlApplication.getCurrentId(this));
+
+        if (altIdManager.hasAltId(alternateId, SqrlApplication.getCurrentId(LoginActivity.this))) {
+            mAltIdHandled = true;
+            return;
+        }
+
+        if (!askBeforeSavingAltId) {
+            altIdManager.saveAltId(alternateId, SqrlApplication.getCurrentId(this));
+            mAltIdHandled = true;
+            return;
+        }
+
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    altIdManager.saveAltId(alternateId, SqrlApplication.getCurrentId(this));
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    break;
+            }
+
+            mAltIdHandled = true;
+        };
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(LoginActivity.this);
+        builder.setTitle(R.string.save_alt_id_confirmation_title)
+                .setMessage(getString(R.string.save_alt_id_confirmation_message, alternateId))
+                .setIcon(R.drawable.ic_id_management_menuitemcolor_24dp)
+                .setNegativeButton(R.string.remove_identity_confirmation_negative, dialogClickListener)
+                .setPositiveButton(R.string.remove_identity_confirmation_positive, dialogClickListener)
+                .setCancelable(false)
+                .show();
     }
 
     private boolean decryptIdentityInternal(SQRLStorage storage, boolean useQuickPass) {

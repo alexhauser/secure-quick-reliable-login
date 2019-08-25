@@ -31,6 +31,7 @@ public class SqrlApplication extends Application {
     public static final String EXTRA_NEXT_ACTIVITY = "next_activity";
     public static final String SHARED_PREF_ALT_IDS = "alt_ids";
     public static final String SHARED_PREF_STORE_ALT_IDS = "store_alt_ids";
+    public static final String SHARED_PREF_ASK_BEFORE_STORING_ALT_IDS = "ask_before_storing_alt_ids";
 
     static ShortcutInfo scanShortcut;
     static ShortcutInfo logonShortcut;
