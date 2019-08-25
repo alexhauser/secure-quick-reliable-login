@@ -127,6 +127,19 @@
                 android:importantForAutofill="no" tools:targetApi="o" />
 
             <ImageView
+                android:id="@+id/imgAlternateIdList"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:padding="4dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintTop_toTopOf="@+id/txtAlternateId"
+                app:layout_constraintEnd_toEndOf="@+id/txtAlternateId"
+                app:srcCompat="@drawable/ic_list_accent_24dp" />
+
+            <ImageView
                 android:id="@+id/imgAlternateIdHelp"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
