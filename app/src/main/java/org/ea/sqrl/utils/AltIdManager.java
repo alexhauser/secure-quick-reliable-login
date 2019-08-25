@@ -49,7 +49,7 @@ public class AltIdManager {
         Set<String> altIdsWithIdIndices = getAltIdsRaw();
 
         for (String entry : altIdsWithIdIndices ) {
-            String[] tokens = entry.split(";", 1);
+            String[] tokens = entry.split(";", 2);
             if (tokens.length < 2) continue;
             long altIdIdentityId = Long.valueOf(tokens[0]);
             if (altIdIdentityId == identityId || identityId == -1) {
@@ -100,7 +100,7 @@ public class AltIdManager {
         boolean changed = false;
 
         for (String entry : altIds) {
-            String[] tokens = entry.split(";", 1);
+            String[] tokens = entry.split(";", 2);
             if (tokens.length < 2) continue;
 
             long storedIdentityId = Long.valueOf(tokens[0]);
@@ -133,7 +133,7 @@ public class AltIdManager {
         Set<String> altIds = getAltIdsRaw();
 
         for (String entry : altIds) {
-            String[] tokens = entry.split(";", 1);
+            String[] tokens = entry.split(";", 2);
             if (tokens.length < 2) continue;
 
             long storedIdentityId = Long.valueOf(tokens[0]);
@@ -160,7 +160,7 @@ public class AltIdManager {
         Set<String> altIds = getAltIdsRaw();
 
         for (String entry : altIds) {
-            String[] tokens = entry.split(";", 1);
+            String[] tokens = entry.split(";", 2);
             if (tokens.length < 2) continue;
 
             long storedIdentityId = Long.valueOf(tokens[0]);

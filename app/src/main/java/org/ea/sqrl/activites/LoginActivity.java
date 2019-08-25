@@ -1,11 +1,13 @@
 package org.ea.sqrl.activites;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.biometrics.BiometricPrompt;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,6 +27,7 @@ import org.ea.sqrl.processors.BioAuthenticationCallback;
 import org.ea.sqrl.processors.CommunicationFlowHandler;
 import org.ea.sqrl.processors.CommunicationHandler;
 import org.ea.sqrl.processors.SQRLStorage;
+import org.ea.sqrl.utils.AltIdManager;
 import org.ea.sqrl.utils.IdentitySelector;
 import org.ea.sqrl.utils.RescueCodeInputHelper;
 import org.ea.sqrl.utils.SqrlApplication;
@@ -168,6 +171,13 @@ public class LoginActivity extends LoginBaseActivity {
     protected void onResume() {
         super.onResume();
 
+        //TODO: This is only for testing, remove this before publishing
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(SqrlApplication.SHARED_PREF_STORE_ALT_IDS, true);
+        editor.apply();
+        // TODO end
+
         boolean runningTest = getIntent().getBooleanExtra("RUNNING_TEST", false);
         if(runningTest) return;
 
@@ -214,6 +224,7 @@ public class LoginActivity extends LoginBaseActivity {
     }
 
     private void setupAdvancedFunctions() {
+        final AltIdManager altIdManager = AltIdManager.getInstance(this);
         final ConstraintLayout advancedFunctionsLayout = findViewById(R.id.advancedFunctionsLayout);
         final ImageView imgAdvancedFunctionsToggle = findViewById(R.id.imgAdvancedFunctionsToggle);
         final ImageView imgAlternateIdList = findViewById(R.id.imgAlternateIdList);
@@ -260,6 +271,15 @@ public class LoginActivity extends LoginBaseActivity {
 
         imgAdvancedFunctionsToggle.setOnClickListener(toggleAdvancedFunctionsListener);
         txtAdvancedFunctions.setOnClickListener(toggleAdvancedFunctionsListener);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean saveAltIds = sharedPreferences.getBoolean(SqrlApplication.SHARED_PREF_STORE_ALT_IDS, false);
+
+        if (saveAltIds && altIdManager.hasAltIds(SqrlApplication.getCurrentId(this))) {
+            imgAlternateIdList.setVisibility(View.VISIBLE);
+        } else {
+            imgAlternateIdList.setVisibility(View.GONE);
+        }
 
         advancedFunctionsLayout.setVisibility(View.GONE);
     }
@@ -356,7 +376,7 @@ public class LoginActivity extends LoginBaseActivity {
 
         String alternateId = ((TextView)findViewById(R.id.txtAlternateId)).getText().toString();
         if (!alternateId.equals("")) {
-            communicationFlowHandler.setAlternativeId(alternateId);
+            handleAltId(alternateId);
         }
 
         communicationFlowHandler.setUrlBasedLogin(useCps);
@@ -409,6 +429,17 @@ public class LoginActivity extends LoginBaseActivity {
 
             communicationFlowHandler.handleNextAction();
         }).start();
+    }
+
+    private void handleAltId(String alternateId) {
+        communicationFlowHandler.setAlternativeId(alternateId);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean storeAltIds = sharedPreferences.getBoolean(SqrlApplication.SHARED_PREF_STORE_ALT_IDS, false);
+        if (!storeAltIds) return;
+
+        AltIdManager altIdManager = AltIdManager.getInstance(this);
+        altIdManager.saveAltId(alternateId, SqrlApplication.getCurrentId(this));
     }
 
     private boolean decryptIdentityInternal(SQRLStorage storage, boolean useQuickPass) {
