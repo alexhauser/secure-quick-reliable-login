@@ -135,8 +135,6 @@
         <activity
             android:name=".activites.LoginActivity"
             android:label="@string/title_activity_url_login"
-            android:noHistory="true"
-            android:excludeFromRecents="true"
             >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
