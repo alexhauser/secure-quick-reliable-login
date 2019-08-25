@@ -1,8 +1,12 @@
 package org.ea.sqrl.utils;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
+
+import org.ea.sqrl.R;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,7 +15,7 @@ import java.util.Set;
 
 /**
  * AltIdManager provides functionality for saving and managing
- * SQRL's "alternate identities" for the user.
+ * SQRL's so called "alternate identities".
  *
  * @author Alexander Hauser (alexhauser)
  */
@@ -19,6 +23,11 @@ public class AltIdManager {
     private static final String TAG = AltIdManager.class.getSimpleName();
     private static AltIdManager mInstance;
     private static Context mContext;
+    private AltIdSelectedListener mAltIdSelectedListener = null;
+
+    public interface AltIdSelectedListener {
+        void onAltIdSelected(String altId);
+    }
 
     private AltIdManager(Context context) {
         mContext = context;
@@ -170,6 +179,36 @@ public class AltIdManager {
         }
 
         return false;
+    }
+
+    /***
+     * Display a UI dialog for choosing a stored alt-id
+     *
+     * @param identityId    The id of the corresponding identity. Specify -1
+     *                      to list all available alt-ids.
+     */
+    public void showChooseAltIdDialog(Context context, long identityId) {
+        List<String> altIds = getAltIds(identityId);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+        dialogBuilder.setIcon(R.drawable.ic_id_management_menuitemcolor_24dp);
+        dialogBuilder.setTitle(context.getResources().getString(R.string.choose_alt_id_dialog_title));
+        dialogBuilder.setSingleChoiceItems(altIds.toArray(new CharSequence[0]),
+                -1, (DialogInterface dialog, int item) -> {
+                    if (mAltIdSelectedListener != null) {
+                        mAltIdSelectedListener.onAltIdSelected(altIds.get(item));
+                    }
+                    dialog.dismiss();
+                });
+        AlertDialog alert = dialogBuilder.create();
+        alert.show();
+    }
+
+    /**
+     * Sets a listener that will be called when an alternate id was selected using the UI dialog.
+     * @param listener The listener to call  when an alt-id was selected.
+     */
+    public void setAltIdSelectedListener(AltIdSelectedListener listener) {
+        mAltIdSelectedListener = listener;
     }
 
     private Set<String> getAltIdsRaw() {

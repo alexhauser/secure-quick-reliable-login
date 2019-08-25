@@ -277,9 +277,13 @@ public class LoginActivity extends LoginBaseActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean saveAltIds = sharedPreferences.getBoolean(SqrlApplication.SHARED_PREF_STORE_ALT_IDS, false);
 
-        imgAlternateIdList.setOnClickListener(view -> {
+        altIdManager.setAltIdSelectedListener(altId ->
+            ((TextView)findViewById(R.id.txtAlternateId)).setText(altId));
 
-        });
+        imgAlternateIdList.setOnClickListener(view ->
+                altIdManager.showChooseAltIdDialog(LoginActivity.this,
+                        SqrlApplication.getCurrentId(LoginActivity.this)));
+
         if (saveAltIds && altIdManager.hasAltIds(SqrlApplication.getCurrentId(this))) {
             imgAlternateIdList.setVisibility(View.VISIBLE);
         } else {
