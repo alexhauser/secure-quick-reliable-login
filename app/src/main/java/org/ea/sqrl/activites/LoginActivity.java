@@ -216,6 +216,7 @@ public class LoginActivity extends LoginBaseActivity {
     private void setupAdvancedFunctions() {
         final ConstraintLayout advancedFunctionsLayout = findViewById(R.id.advancedFunctionsLayout);
         final ImageView imgAdvancedFunctionsToggle = findViewById(R.id.imgAdvancedFunctionsToggle);
+        final ImageView imgAlternateIdList = findViewById(R.id.imgAlternateIdList);
         final TextView txtAdvancedFunctions = findViewById(R.id.txtAdvancedFunctions);
         final RadioGroup radgrpAccountOptions = findViewById(R.id.radgrpAccountOptions);
         final Button btnLogin = findViewById(R.id.btnLogin);
